@@ -37,7 +37,7 @@ class BrownianVariableHistory(object):
         Returns 2 data points. The first will be the data point with the largest 't' in the history that is still
         smaller than the given user provided argument 't'. The second will be the datapoint with the smallest 't'
         that is still larger than the user provided 't'. If one or both of the data points do not exist, this
-        function will return None that data point's place.
+        function will return None in that data point's place.
 
         t       (float): time
         returns ((t1,val1), (t2,val2)) where t1, t2, val1, val2 are floats : 2 data points
@@ -58,7 +58,12 @@ class BrownianVariableHistory(object):
 
 class BrownianVariable(object):
     def __init__(self, sigma, startTime=0, startVal=0, drift=0, history=BrownianHistory()):
-        pass
+        self._sigma             = sigma
+        self._sigmastartTime    = startTime
+        self._startVal          = startVal
+        self._drift             = drift
+        self._history           = history
+        self._history.insertData(startTime,startVal) # add the seed point into the history
 
     def getHistory(self):
         '''
@@ -67,15 +72,28 @@ class BrownianVariable(object):
 
         returns BrownianVariableHistory : history object
         '''
-        raise Exception('Not Yet Implemented Error')
+        return self._history
 
     def getPossibleValueDistr(self, t):
         '''
-        Gets a numpy distribution object representing the pdf of the brownian value at a given t
+        Gets a scipy distribution object representing the pdf of the brownian value at a given t
 
-        returns BrownianVariableHistory : history object
+        returns scipy.stats.rv_continuous : distribution
         '''
-        raise Exception('Not Yet Implemented Error')
+        leftDataPoint, rightDataPoint = self.self._history.getMartingaleRelevantPoints()
+        if not (leftDataPoint or rightDataPoint):
+            # should only happen if the history invariant has been violated
+            raise Exception('Brownian History Corruption Error')
+        elif not rightDataPoint:
+            # find the probability distribution given
+            raise Exception('Not Yet Implemented Error')
+        elif not leftDataPoint:
+            # run back the clock, and finding a probability distribution of the past given the future
+            raise Exception('Not Yet Implemented Error')
+        else:
+            # given past and future data, get the probability distribution of a brownian variable sometime in
+            # the present
+            raise Exception('Not Yet Implemented Error')
 
     def getValue(self, t, storeInHistory=true):
         '''
@@ -86,4 +104,8 @@ class BrownianVariable(object):
         storeInHistory (bool) : true if the generated value should be inserted into the history
         returns (float) : value
         '''
-        raise Exception('Not Yet Implemented Error')
+        distr = self.getPossibleValueDistr(t)
+        val = distr.rvs()
+        if storeInHistory:
+            self._history.insertData(t, val)
+        return val
