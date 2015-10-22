@@ -6,13 +6,12 @@ Date Last Modified: 10/22/15
 Python Version: 2.7.10
 Description: Several statistical functions and classes used to efficiently handle continuous Brownian variables
 """
-import numpy as np
 from scipy.stats import norm
 from bintrees import RBTree
 
 
 class BrownianVariableHistory(object):
-    ''' Represents the set of known time value pairs for a particular brownian variable '''
+    ''' Represents the set of known time value pairs for a particular Brownian variable '''
 
     def __init__(self):
         self._historyTree = RBTree()
@@ -45,6 +44,7 @@ class BrownianVariableHistory(object):
 
 
 class BrownianVariable(object):
+    ''' Random variable that has a Brownian motion '''
 
     def __init__(self, sigma, startTime=0, startVal=0, drift=0, history=BrownianVariableHistory()):
         self._sigma = sigma
@@ -70,7 +70,7 @@ class BrownianVariable(object):
 
         returns scipy.stats.rv_continuous : distribution
         '''
-        leftDataPoint, rightDataPoint = self.self._history.getMartingaleRelevantPoints()
+        leftDataPoint, rightDataPoint = self._history.getMartingaleRelevantPoints()
         if not (leftDataPoint or rightDataPoint):
             # should only happen if the history invariant has been violated
             raise Exception('Brownian History Corruption Error')
@@ -108,7 +108,7 @@ class BrownianVariable(object):
                     * meanRight) / (standardDevLeft**(-2) + standardDevRight**(-2))
             standardDev = ((standardDevLeft**2 * standardDevRight**2) /
                            (standardDevLeft**2 + standardDevRight**2))**0.5
-                           
+
             return norm(loc=mean, scale=standardDev)
 
     def getValue(self, t, storeInHistory=True):
