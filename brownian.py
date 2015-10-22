@@ -7,6 +7,7 @@ Python Version: 2.7.10
 Description: Several statistical functions and classes used to efficiently handle continuous Brownian variables
 """
 import numpy as np
+from scipy.stats import norm
 
 class DataPoint(object):
     ''' Represents a data point in 2D space '''
@@ -57,7 +58,7 @@ class BrownianVariableHistory(object):
         raise Exception('Not Yet Implemented Error')
 
 class BrownianVariable(object):
-    def __init__(self, sigma, startTime=0, startVal=0, drift=0, history=BrownianHistory()):
+    def __init__(self, sigma, startTime=0, startVal=0, drift=0, history=BrownianVariableHistory()):
         self._sigma             = sigma
         self._sigmastartTime    = startTime
         self._startVal          = startVal
@@ -85,17 +86,23 @@ class BrownianVariable(object):
             # should only happen if the history invariant has been violated
             raise Exception('Brownian History Corruption Error')
         elif not rightDataPoint:
-            # find the probability distribution given
-            raise Exception('Not Yet Implemented Error')
+            # find the probability distribution given past data
+            prevT, prevVal = leftDataPoint
+            mean = ((t - prevT) * self._drift + prevVal)
+            standardDev = ((t - prevT)**0.5 * self._sigma)
+            return norm(loc=mean, scale=standardDev)
         elif not leftDataPoint:
             # run back the clock, and finding a probability distribution of the past given the future
-            raise Exception('Not Yet Implemented Error')
+            futrT, futrVal = rightDataPoint
+            mean = ((t - futrT) * self._drift + futrVal)
+            standardDev = ((futrT - t)**0.5 * self._sigma)
+            return norm(loc=mean, scale=standardDev)
         else:
             # given past and future data, get the probability distribution of a brownian variable sometime in
             # the present
             raise Exception('Not Yet Implemented Error')
 
-    def getValue(self, t, storeInHistory=true):
+    def getValue(self, t, storeInHistory=True):
         '''
         Gets a value from the probability density function for a particular time t
         given the history of past values. This function will also add this data
