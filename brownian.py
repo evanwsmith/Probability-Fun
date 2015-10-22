@@ -10,8 +10,10 @@ import numpy as np
 from scipy.stats import norm
 from bintrees import RBTree
 
+
 class BrownianVariableHistory(object):
     ''' Represents the set of known time value pairs for a particular brownian variable '''
+
     def __init__(self):
         self._historyTree = RBTree()
 
@@ -41,14 +43,17 @@ class BrownianVariableHistory(object):
         rightPoint = self._historyTree.succ_item(t)
         return leftPoint, rightPoint
 
+
 class BrownianVariable(object):
+
     def __init__(self, sigma, startTime=0, startVal=0, drift=0, history=BrownianVariableHistory()):
-        self._sigma             = sigma
-        self._sigmastartTime    = startTime
-        self._startVal          = startVal
-        self._drift             = drift
-        self._history           = history
-        self._history.insertData(startTime,startVal) # add the seed point into the history
+        self._sigma = sigma
+        self._sigmastartTime = startTime
+        self._startVal = startVal
+        self._drift = drift
+        self._history = history
+        # add the seed point into the history
+        self._history.insertData(startTime, startVal)
 
     def getHistory(self):
         '''
@@ -69,22 +74,42 @@ class BrownianVariable(object):
         if not (leftDataPoint or rightDataPoint):
             # should only happen if the history invariant has been violated
             raise Exception('Brownian History Corruption Error')
+
         elif not rightDataPoint:
             # find the probability distribution given past data
             prevT, prevVal = leftDataPoint
             mean = ((t - prevT) * self._drift + prevVal)
             standardDev = ((t - prevT)**0.5 * self._sigma)
             return norm(loc=mean, scale=standardDev)
+
         elif not leftDataPoint:
-            # run back the clock, and finding a probability distribution of the past given the future
+            # run back the clock, and finding a probability distribution of the
+            # past given the future
             futrT, futrVal = rightDataPoint
             mean = ((t - futrT) * self._drift + futrVal)
             standardDev = ((futrT - t)**0.5 * self._sigma)
             return norm(loc=mean, scale=standardDev)
+
         else:
             # given past and future data, get the probability distribution of a brownian variable sometime in
             # the present
-            raise Exception('Not Yet Implemented Error')
+            prevT, prevVal = leftDataPoint
+            futrT, futrVal = rightDataPoint
+
+            meanLeft = ((t - prevT) * self._drift + prevVal)
+            meanRight = ((t - futrT) * self._drift + futrVal)
+            standardDevLeft = ((t - prevT)**0.5 * self._sigma)
+            standardDevRight = ((futrT - t)**0.5 * self._sigma)
+
+            # new probability distribution is equal to the scaled
+            # multiplication of the two normal distributions, which happens to
+            # be itself normal
+            mean = (standardDevLeft**(-2) * meanLeft + standardDevRight**(-2)
+                    * meanRight) / (standardDevLeft**(-2) + standardDevRight**(-2))
+            standardDev = ((standardDevLeft**2 * standardDevRight**2) /
+                           (standardDevLeft**2 + standardDevRight**2))**0.5
+                           
+            return norm(loc=mean, scale=standardDev)
 
     def getValue(self, t, storeInHistory=True):
         '''
