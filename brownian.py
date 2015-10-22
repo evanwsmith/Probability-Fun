@@ -2,7 +2,7 @@
 File: brownian.py
 Author: Evan Smith
 Date Created: 10/17/15
-Date Last Modified: 10/17/15
+Date Last Modified: 10/22/15
 Python Version: 2.7.10
 Description: Several statistical functions and classes used to efficiently handle continuous Brownian variables
 """
