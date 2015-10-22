@@ -8,21 +8,12 @@ Description: Several statistical functions and classes used to efficiently handl
 """
 import numpy as np
 from scipy.stats import norm
-
-class DataPoint(object):
-    ''' Represents a data point in 2D space '''
-    def __init__(self, t, val):
-        '''
-        t   (float): time
-        val (float): value
-        '''
-        self.t = t
-        self.val = val
+from bintrees import RBTree
 
 class BrownianVariableHistory(object):
     ''' Represents the set of known time value pairs for a particular brownian variable '''
     def __init__(self):
-        pass
+        self._historyTree = RBTree()
 
     def insertData(self, t, val):
         '''
@@ -31,7 +22,7 @@ class BrownianVariableHistory(object):
         t   (float): time
         val (float): value
         '''
-        self._insertDataPoint(DataPoint(t, val))
+        self._historyTree.insert(t, val)
 
     def getMartingaleRelevantPoints(self, t):
         '''
@@ -46,16 +37,9 @@ class BrownianVariableHistory(object):
         Ex: bh.getMartingaleRelevantPoints(3.1) == ((3.0, 0.07), (3.5, 0.21))
             bh.getMartingaleRelevantPoints(3.6) == ((3.5, 0.21), None)
         '''
-        raise Exception('Not Yet Implemented Error')
-
-    def _insertDataPoint(self, dataPoint):
-        '''
-        Inserts a data point object into the history object
-
-        t   (float): time
-        val (float): value
-        '''
-        raise Exception('Not Yet Implemented Error')
+        leftPoint = self._historyTree.prev_item(t)
+        rightPoint = self._historyTree.succ_item(t)
+        return leftPoint, rightPoint
 
 class BrownianVariable(object):
     def __init__(self, sigma, startTime=0, startVal=0, drift=0, history=BrownianVariableHistory()):
