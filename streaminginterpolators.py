@@ -1,8 +1,8 @@
 """
-File: streaminginterpolator.py
+File: streaminginterpolators.py
 Author: Evan Smith
 Date Created: 10/22/15
-Date Last Modified: 10/22/15
+Date Last Modified: 10/23/15
 Python Version: 2.7.10
 Description: Classes to efficiently interpolate streamed data
 """
@@ -120,3 +120,31 @@ class NearestNeighborStreamingInterpolator(StreamingInterpolatorBase):
             return leftVal
         else:
             return rightVal
+
+
+if __name__ == '__main__':
+    lsi = LinearStreamingInterpolator()
+    nnsi = NearestNeighborStreamingInterpolator()
+    data = [(0, 0), (10, 20), (12, 10), (22, 0), (30, 0), (40, 15)]
+    for x, val in data:
+        lsi.insert(x, val)
+        nnsi.insert(x, val)
+    '''print 'x = {0}, interpolated val = {1}'.format(0, lsi.getInterpolatedVal(0))
+    print 'x = {0}, interpolated val = {1}'.format(5, lsi.getInterpolatedVal(5))
+    print 'x = {0}, interpolated val = {1}'.format(24, lsi.getInterpolatedVal(24))
+    print 'x = {0}, interpolated val = {1}'.format(35, lsi.getInterpolatedVal(35))
+
+    print 'x = {0}, interpolated val = {1}'.format(45, lsi.getInterpolatedVal(45))
+    print 'x = {0}, interpolated val = {1}'.format(-10, lsi.getInterpolatedVal(-10))'''
+
+    print 'x = {0}, interpolated val = {1}'.format(0, nnsi.getInterpolatedVal(0))
+    print 'x = {0}, interpolated val = {1}'.format(5, nnsi.getInterpolatedVal(5))
+    print 'x = {0}, interpolated val = {1}'.format(24, nnsi.getInterpolatedVal(24))
+    print 'x = {0}, interpolated val = {1}'.format(34, nnsi.getInterpolatedVal(34))
+
+    print 'x = {0}, interpolated val = {1}'.format(45, nnsi.getInterpolatedVal(45))
+    print 'x = {0}, interpolated val = {1}'.format(-10, nnsi.getInterpolatedVal(-10))
+
+
+def a():
+    pass
